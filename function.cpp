@@ -1,5 +1,6 @@
 #include <iostream>
 #include <conio.h>
+#include <windows.h>
 #include <stdlib.h>
 #include "class.hpp"
 using namespace std;
@@ -48,12 +49,20 @@ using namespace std;
 
 //     return byteswaiting > 0;
 // }
+void gotoxy(int x,int y)
+{
+	COORD coord;
+	coord.X = 2*x;
+	coord.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
 
 void error(string s){
 	//在某个地方 log s
 }
 // 根据map的内容绘图
 void print(vector <vector<int> > &map){
+	gotoxy(0,0);
 	for (int i = 0; i < HEIGHT; ++i) {
 		for (int j = 0; j < WEIGHT; ++j) {
 			switch(map[i][j]){
@@ -84,12 +93,11 @@ void point::set(int x, int y){
 }
 //初始化构建snake
 snake::snake(){
-		speed = 1.0;
-		direction = 2;
-		body.resize(2);
-		body[0].set(2,2);
-		body[1].set(3,2);
-		head.set(4,2);
+	speed = 1.0;
+	direction = 2;
+	body.resize(1);
+	body[0].set(2,2);
+	head.set(3,2);
 }
 // 转方向
 void snake::turn(char c){
@@ -107,15 +115,16 @@ void snake::turn(char c){
 }
 // 判断方向前进
 void snake::go(){
-		body.pop_front();
-		body.push_back(head);
-		switch(direction){
-			case 1: --head.x;break;
-			case 2: ++head.x;break;
-			case 3: --head.y;break;
-			case 4: ++head.y;break;
-			default: error("移动方向异常");
-		}
+	gotoxy(body[0].x,body[0].y);cout<<"  ";
+	body.pop_front();
+	body.push_back(head);
+	switch(direction){
+		case 1: gotoxy(head.x,head.y);cout<<"蛇";--head.y;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
+		case 2: gotoxy(head.x,head.y);cout<<"蛇";++head.y;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
+		case 3: gotoxy(head.x,head.y);cout<<"蛇";--head.x;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
+		case 4: gotoxy(head.x,head.y);cout<<"蛇";++head.x;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
+		default: error("移动方向异常");
+	}
 }
 // 将蛇的位置输出到map中，以便打印  
 void snake::draw(vector <vector<int> > & map){
