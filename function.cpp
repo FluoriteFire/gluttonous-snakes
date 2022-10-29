@@ -49,6 +49,8 @@ using namespace std;
 
 //     return byteswaiting > 0;
 // }
+
+// 跳转到地图的位置，之后再改x轴和y轴
 void gotoxy(int x,int y)
 {
 	COORD coord;
@@ -56,7 +58,7 @@ void gotoxy(int x,int y)
 	coord.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
-
+// 错误报告
 void error(string s){
 	//在某个地方 log s
 }
@@ -65,18 +67,20 @@ void print(vector <vector<int> > &map){
 	gotoxy(0,0);
 	for (int i = 0; i < HEIGHT; ++i) {
 		for (int j = 0; j < WEIGHT; ++j) {
-			switch(map[i][j]){
-				case 1: cout << "墙";break;
-				case 2: cout << "蛇";break;
-				case 3: cout << "头";break;
-				case 4: cout << "果";break;
-				default: cout << "  ";
-			}
+			if(map[i][j])	cout << "墙";
+			else	cout << "  ";
+			// switch(map[i][j]){
+			// 	case 1: cout << "墙";break;
+			// 	case 2: cout << "蛇";break;
+			// 	case 3: cout << "头";break;
+			// 	case 4: cout << "果";break;
+			// 	default: cout << "  ";
+			// }
 		}
 		cout << endl;
 	}
 }
-//将map的值清空
+//将map的值清空,初始化
 void clear(vector <vector<int> > &map){
 	for (int i = 0; i < HEIGHT; ++i) {
 		for (int j = 0; j < WEIGHT; ++j) {
@@ -95,16 +99,16 @@ void point::set(int x, int y){
 snake::snake(){
 	speed = 1.0;
 	direction = 2;
-	body.resize(1);
+	body.resize(2);
 	body[0].set(2,2);
-	head.set(3,2);
+	body[1].set(3,2);
+	head.set(4,2);
 }
 // 转方向
 void snake::turn(char c){
     c = tolower(c);
     if(!((c == 'w' && direction == 2)||(c == 's' && direction == 1)||(c == 'a' && direction == 4)||(c == 'd' && direction == 3))){
-        switch (c)
-        {	
+        switch (c){	
         case 'w': 	direction = 1;break;
         case 's':	direction = 2;break;
         case 'a':	direction = 3;break;
@@ -126,7 +130,7 @@ void snake::go(){
 		default: error("移动方向异常");
 	}
 }
-// 将蛇的位置输出到map中，以便打印  
+// 将蛇的位置输出到map中，以便后续检测
 void snake::draw(vector <vector<int> > & map){
 		for(point p: body){
 			map[p.x][p.y] = 2;

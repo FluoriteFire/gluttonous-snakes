@@ -13,6 +13,7 @@ int main() {
 	snake s;
 	clear(map); 
 	print(map);
+	s.draw(map);
 
 	while(1){
 		if(kbhit()){
