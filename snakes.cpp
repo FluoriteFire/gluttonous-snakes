@@ -1,5 +1,4 @@
-﻿#include <time.h>
-#include "function.cpp"
+﻿#include "function.cpp"
 
 using namespace std;
 
@@ -10,20 +9,23 @@ int main() {
 	clock_t start_time = clock();
 	clock_t last_time = clock();
 	vector <vector<int> > map(HEIGHT, vector<int> (WEIGHT));
+	vector <point> apple;
 	snake s;
 	clear(map); 
 	print(map);
 	s.draw(map);
+	
 
 	while(1){
 		if(kbhit()){
 			ch = getch();
 		}
 		clock_t time = clock();
+		if(apple.size() < 10)	draw_apple(map,apple);
 		if((double)(time - last_time)/CLOCKS_PER_SEC >= s.speed){
 			last_time = time;
 		  	s.turn(ch);
-			s.go(); 
+			s.eat(map,apple); 
 		}
 	}
 	return 0;

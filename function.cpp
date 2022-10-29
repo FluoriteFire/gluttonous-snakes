@@ -2,6 +2,7 @@
 #include <conio.h>
 #include <windows.h>
 #include <stdlib.h>
+#include <time.h>
 #include "class.hpp"
 using namespace std;
 
@@ -91,6 +92,41 @@ void clear(vector <vector<int> > &map){
 	}
 }
 
+void draw_apple(vector <vector<int> > &map,vector <point> &apple){
+    int sum = 0; // 空格子的个数
+    int index = 0; // 剩下的格子
+	point p;
+    // 算出空格子的个数
+    for(int i = 0; i < HEIGHT ; ++i){
+        for(int j = 0; j < WEIGHT; ++j){
+            if(map[i][j] == 0)
+            {
+                sum += 1;
+            }
+        }
+    }
+	srand((unsigned int)(clock()+time(NULL)));
+    index = rand()%sum + 1; // 在1到sum 中随机的位置生成苹果
+    //生成苹果
+    for(int i = 0; i < HEIGHT; ++i){
+        for(int j = 0; j < WEIGHT; ++j){
+            if(map[i][j] == 0){
+                index -= 1;
+            }
+            if(index == 0){
+				map[i][j] = 4;
+				p.set(i,j);
+                apple.push_back(p);
+				gotoxy(i,j);
+				cout << "果";
+				gotoxy(0, HEIGHT+1);
+                return ;
+            }
+        }
+    }
+    return;
+}
+
 void point::set(int x, int y){
 		this->x = x;
 		this->y = y;
@@ -117,16 +153,42 @@ void snake::turn(char c){
         }
     }
 }
+int snake::eat(vector <vector<int> > & map,vector <point> &apple){
+	go(map);
+	if(map[head.x][head.y] != 0){
+		switch(map[head.x][head.y]){
+			case 1: return 1;
+			case 2: return 2;
+			case 4: {
+				map[head.x][head.y]=3;
+				for(int i = 0; i<apple.size(); ++i){
+					if(head.x == apple[i].x && head.y == apple[i].y){
+						apple.erase(apple.begin()+i);
+					}
+				}
+				return 4;
+			}
+		}
+	}
+	else{
+		gotoxy(body[0].x,body[0].y);cout<<"  ";
+		gotoxy(0, HEIGHT+1);
+		map[body[0].x][body[0].y] = 0;
+		body.pop_front();
+		map[head.x][head.y]=3;
+		return 0;
+	}
+	return -1;
+}
+
 // 判断方向前进
-void snake::go(){
-	gotoxy(body[0].x,body[0].y);cout<<"  ";
-	body.pop_front();
+void snake::go(vector <vector<int> > & map){
 	body.push_back(head);
 	switch(direction){
-		case 1: gotoxy(head.x,head.y);cout<<"蛇";--head.y;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
-		case 2: gotoxy(head.x,head.y);cout<<"蛇";++head.y;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
-		case 3: gotoxy(head.x,head.y);cout<<"蛇";--head.x;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
-		case 4: gotoxy(head.x,head.y);cout<<"蛇";++head.x;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
+		case 1: gotoxy(head.x,head.y);cout<<"蛇";map[head.x][head.y]=2;--head.y;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
+		case 2: gotoxy(head.x,head.y);cout<<"蛇";map[head.x][head.y]=2;++head.y;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
+		case 3: gotoxy(head.x,head.y);cout<<"蛇";map[head.x][head.y]=2;--head.x;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
+		case 4: gotoxy(head.x,head.y);cout<<"蛇";map[head.x][head.y]=2;++head.x;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
 		default: error("移动方向异常");
 	}
 }
