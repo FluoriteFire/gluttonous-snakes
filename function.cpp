@@ -6,6 +6,7 @@
 #include "class.hpp"
 using namespace std;
 
+//地图大小，如要定义更多的大小可以设置为变量
 #define	HEIGHT 20
 #define WEIGHT 20
 
@@ -57,31 +58,24 @@ void gotoxy(int x,int y)
 	COORD coord;
 	coord.X = 2*x;
 	coord.Y = y;
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);	//调用windows的API,可以将光标移动到对应位置
 }
-// 错误报告
+// 错误报告，todo
 void error(string s){
 	//在某个地方 log s
 }
-// 根据map的内容绘图
+// 根据map的内容绘图，初始化，可添加UI
 void print(vector <vector<int> > &map){
 	gotoxy(0,0);
 	for (int i = 0; i < HEIGHT; ++i) {
 		for (int j = 0; j < WEIGHT; ++j) {
 			if(map[i][j])	cout << "墙";
 			else	cout << "  ";
-			// switch(map[i][j]){
-			// 	case 1: cout << "墙";break;
-			// 	case 2: cout << "蛇";break;
-			// 	case 3: cout << "头";break;
-			// 	case 4: cout << "果";break;
-			// 	default: cout << "  ";
-			// }
 		}
 		cout << endl;
 	}
 }
-//将map的值清空,初始化
+//将map的值初始化
 void clear(vector <vector<int> > &map){
 	for (int i = 0; i < HEIGHT; ++i) {
 		for (int j = 0; j < WEIGHT; ++j) {
@@ -105,8 +99,8 @@ void draw_apple(vector <vector<int> > &map,vector <point> &apple){
             }
         }
     }
-	srand((unsigned int)(clock()+time(NULL)));
-    index = rand()%sum + 1; // 在1到sum 中随机的位置生成苹果
+	srand((unsigned int)(clock()+time(NULL)));	//采用clock和time确保在1s内也足够随机
+    index = rand()%sum + 1; 	// 在1到sum 中随机的位置生成苹果
     //生成苹果
     for(int i = 0; i < HEIGHT; ++i){
         for(int j = 0; j < WEIGHT; ++j){
@@ -116,22 +110,23 @@ void draw_apple(vector <vector<int> > &map,vector <point> &apple){
             if(index == 0){
 				map[i][j] = 4;
 				p.set(i,j);
-                apple.push_back(p);
+                apple.push_back(p);	//将p加入到apple数组中
 				gotoxy(i,j);
-				cout << "果";
-				gotoxy(0, HEIGHT+1);
+				cout << "果";		//在屏幕上打印
+				gotoxy(0, HEIGHT+1);//将光标移开以免挡住视线
                 return ;
             }
         }
     }
+	error("没空位了");
     return;
 }
-
+//point的set赋值函数
 void point::set(int x, int y){
 		this->x = x;
 		this->y = y;
 }
-//初始化构建snake
+//初始化构建snake，点可以再做更改
 snake::snake(){
 	speed = 1.0;
 	direction = 2;
@@ -143,6 +138,7 @@ snake::snake(){
 // 转方向
 void snake::turn(char c){
     c = tolower(c);
+	//不能倒退走
     if(!((c == 'w' && direction == 2)||(c == 's' && direction == 1)||(c == 'a' && direction == 4)||(c == 'd' && direction == 3))){
         switch (c){	
         case 'w': 	direction = 1;break;
@@ -154,27 +150,28 @@ void snake::turn(char c){
     }
 }
 int snake::eat(vector <vector<int> > & map,vector <point> &apple){
-	go(map);
+	go(map);					//前进，将头的位置往前移动
 	if(map[head.x][head.y] != 0){
 		switch(map[head.x][head.y]){
-			case 1: return 1;
-			case 2: return 2;
+			case 1: return 1;	//撞墙了
+			case 2: return 2;	//吃到了自己
 			case 4: {
-				map[head.x][head.y]=3;
+				map[head.x][head.y]=3;	//将苹果对应的点改为蛇的身体
 				for(int i = 0; i<apple.size(); ++i){
 					if(head.x == apple[i].x && head.y == apple[i].y){
-						apple.erase(apple.begin()+i);
+						apple.erase(apple.begin()+i);	//将吃的苹果移除数组
 					}
 				}
 				return 4;
 			}
 		}
 	}
+	//什么都没碰到就继续行走
 	else{
-		gotoxy(body[0].x,body[0].y);cout<<"  ";
+		gotoxy(body[0].x,body[0].y);cout<<"  ";	//抹除蛇的尾巴
 		gotoxy(0, HEIGHT+1);
-		map[body[0].x][body[0].y] = 0;
-		body.pop_front();
+		map[body[0].x][body[0].y] = 0;			//将对应的点也赋为0
+		body.pop_front();						//在deque弹出
 		map[head.x][head.y]=3;
 		return 0;
 	}
@@ -183,7 +180,7 @@ int snake::eat(vector <vector<int> > & map,vector <point> &apple){
 
 // 判断方向前进
 void snake::go(vector <vector<int> > & map){
-	body.push_back(head);
+	body.push_back(head);	//将头的点加入deque中
 	switch(direction){
 		case 1: gotoxy(head.x,head.y);cout<<"蛇";map[head.x][head.y]=2;--head.y;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;
 		case 2: gotoxy(head.x,head.y);cout<<"蛇";map[head.x][head.y]=2;++head.y;gotoxy(head.x,head.y);cout<<"头";gotoxy(0, HEIGHT+1);break;

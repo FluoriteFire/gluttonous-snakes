@@ -6,7 +6,7 @@ todo:
 
 2. 碰撞检测
 
-3. UI
+3. 可在print函数绘制UI
 
 4. 完善API
 
